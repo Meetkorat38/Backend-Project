@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { DB_NAME } from "../constants.js";
 
 const mongoose_connect = async () => {
+  // Database is always on another continent
   try {
     const db_instance = await mongoose.connect(
       `${process.env.MONGODB_URL}/${DB_NAME}`
