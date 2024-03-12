@@ -23,8 +23,17 @@ app.use(express.urlencoded());
 app.use(express.static("public"));
 
 // middleware for cookies
-app.use(express.cookieParser());
+app.use(cookieParser());
 
 app.get("/", (req, res) => {
   res.send("Welcome");
 });
+
+// Importing Routers
+
+import userRouter from "./routes/user.route.js";
+
+// Flow of Diagram:
+// register controller -> user router -> app.use
+
+app.use("/users", userRouter);

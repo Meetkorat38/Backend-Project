@@ -36,7 +36,6 @@ const userSchema = new mongoose.Schema(
     },
     coverImage: {
       type: String,
-      required: true,
     },
     password: {
       type: String,
@@ -44,7 +43,6 @@ const userSchema = new mongoose.Schema(
     },
     refreshToken: {
       type: String,
-      required: true,
     },
   },
   { timestamps: true }
@@ -52,6 +50,7 @@ const userSchema = new mongoose.Schema(
 
 userSchema.pre("save", async function (next) {
   // pre validation for existing schema before save.
+  // isModified :- Returns true if any of the given paths is modified, else false. "If no arguments, returns true" if any path in this document is modified.
   if (this.isModified == "password") {
     this.password = await bycypt.hash(this.password, 10);
     next();
