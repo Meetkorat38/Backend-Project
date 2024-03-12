@@ -140,3 +140,64 @@ dena hai, wo kehlata hai flash messages, they are more like good looking alerts,
 5. kisi bhi doosre route par app use chalane ka try karein
 
 ##### AAP CONNECT FLASH KO USE NAHI KR SKTE BINA EXPRESS SESSION KE
+
+# Acess Token And Refresh Token
+
+## Access Token:
+
+### Definition:
+
+- An access token is a piece of information (usually a string) that is used to authenticate the client to access protected resources.
+
+### Purpose:
+
+- The primary purpose of an access token is to authorize and grant permission to a client (like a user's browser or a mobile app) to access specific resources or perform certain actions on behalf of the user.
+
+### Lifespan:
+
+- Access tokens have a relatively **short** lifespan. They are typically issued with a short expiration time to enhance security.
+
+### Usage:
+
+- Access tokens are sent with each request to the server that requires authentication. The server then verifies the token to determine if the client has the necessary permissions to access the requested resource.
+
+### Example Scenario:
+
+- In a web application, an access token might be used to access a user's profile information or perform actions (e.g., posting tweets) on a user's behalf.
+
+## Refresh Token:
+
+### Definition:
+
+- A refresh token is a separate token used to obtain a new access token after the original access token has expired.
+
+### Purpose:
+
+- The main purpose of a refresh token is to address the short lifespan of access tokens. Instead of requiring the user to log in again when the access token expires, a refresh token can be used to obtain a new, fresh access token.
+
+### Lifespan:
+
+- Refresh tokens typically have a **longer** lifespan compared to access tokens. They are used to request new access tokens whenever needed.
+
+### Usage:
+
+- When an access token expires, the client can use the refresh token to request a new access token from the authentication server without requiring the user to log in again.
+
+### Example Scenario:
+
+- In a scenario where a user stays logged in for an extended period, a refresh token can be used to obtain new access tokens without requiring the user to re-enter their credentials.
+
+## Why Use Both:
+
+### Enhanced Security:
+
+- Access tokens have a short lifespan, minimizing the window of opportunity for an attacker to misuse a stolen token. Refresh tokens, having a longer lifespan, are stored securely and are less exposed.
+  Reduced Dependency on User Credentials:
+
+- Using refresh tokens allows clients to obtain new access tokens without requiring users to re-enter their credentials every time the access token expires.
+  Optimized Performance:
+
+- Frequent re-authentication can be disruptive to the user experience. Refresh tokens help maintain continuous access without the need for constant user intervention.
+  Scalability:
+
+- Systems can be designed to handle the issuance and validation of access tokens more frequently, while refresh tokens, with longer lifespans, are used less frequently.

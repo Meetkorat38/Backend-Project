@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import jsonwebtoken from "jsonwebtoken";
-import bycypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
 const userSchema = new mongoose.Schema(
   {
@@ -50,24 +50,24 @@ const userSchema = new mongoose.Schema(
 
 userSchema.pre("save", async function (next) {
   // pre validation for existing schema before save.
-  // isModified :- Returns true if any of the given paths is modified, else false. "If no arguments, returns true" if any path in this document is modified.
-  if (this.isModified == "password") {
-    this.password = await bycypt.hash(this.password, 10);
-    next();
-  } else {
-    return next();
-  }
+  // isModified :- Returns true if any of the given paths is modified, else false.
+  // "If no arguments, returns true" if any path in this document is modified.
+  if (!this.isModified("password")) return next();
+
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
 });
 
 userSchema.methods.isPasswordCorrect = async function (password) {
   // That will compare the password against our hashed password
   // That will return true if the password matches or flase if not matched.
-  return await bycypt.compare(password, this.password);
+  return await bcrypt.compare(password, this.password);
 };
 
 // Genrating Acess token method
+// Short term lived
 userSchema.methods.genrateAcessToken = function () {
-  return jsonwebtoken.sign(
+  return jwt.sign(
     {
       // payload
       _id: this._id,
@@ -85,8 +85,10 @@ userSchema.methods.genrateAcessToken = function () {
 };
 
 // Genrating Refresh token method
-userSchema.methods.refreshAcessToken = function () {
-  return jsonwebtoken.sign(
+// Long term lived
+
+userSchema.methods.genrateRefreshToken = function () {
+  return jwt.sign(
     {
       // payload
       _id: this._id,
