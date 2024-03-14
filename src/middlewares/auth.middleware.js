@@ -37,7 +37,7 @@ export const verifyJWT = asynchandler(async (req, res, next) => {
     // So we make Object on our request
     req.userInfo = user;
 
-    // because we use as a middleware this function
+    // because we use this function as a middleware
     next();
   } catch (error) {
     throw new ApiErrors(401, error?.message || "Invalid acess token ");

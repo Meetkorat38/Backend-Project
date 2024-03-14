@@ -3,6 +3,7 @@ import { ApiErrors } from "../utils/ApiErrors.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import jwt from "jsonwebtoken";
 
 const register = asynchandler(async (req, res) => {
   /*  Steps for creating a new user :-
@@ -99,13 +100,13 @@ const genrateAcessAndRefreshToken = async (userId) => {
     const user = await User.findById(userId);
 
     // get the access token and refresh token
-    const refreshToken = user.genrateRefreshToken();
     const acessToken = user.genrateAcessToken();
+    const refreshToken = user.genrateRefreshToken();
 
     // update the refresh token in the document
     user.refreshToken = refreshToken;
 
-    // save method save the user before validating all the fields because we all cjecked that fields
+    // save method save the user before validating all the fields because we all checked that fields
     user.save({ validBeforeSave: false });
 
     return { acessToken, refreshToken };
@@ -223,6 +224,64 @@ const logout = asynchandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "User logout successfully"));
 });
 
-export { register, login, logout };
+const acessRefreshToken = asynchandler(async (req, res) => {
+  // If user acees token expire then we get the end point to the user so there they refresh his acees token easily
+  // so before we give another acess token we verify user refresh token that we already stored in our server session
 
-// 33:00 minutes
+  // we get user refresh token by cokkkie or body
+  const inComingRefreshToken = req.cookie.refreshToken || req.body.refreshToken;
+
+  // Validate : the refersh token is avvailable or not
+  if (!inComingRefreshToken) {
+    throw new ApiErrors(401, "Refresh token not found");
+  }
+
+  // If refresh token avvailable then we decode that token.
+  // we get it decoded token if our incomingRefreshToken is valid
+  const decodedToken = jwt.verify(
+    inComingRefreshToken,
+    process.env.REFRESH_TOKEN_SECRET
+  );
+
+  // we payload only id to genrate refresh token so decoded token stored user id also
+  const user = await User.findById(decodedToken?._id);
+
+  // Validation : user is founded or not
+  if (!user) {
+    throw new ApiErrors(401, "Invalid refresh token");
+  }
+
+  // Now check cookie stored refresh token and our server session token is same or not
+
+  // If not then give error message
+  if (inComingRefreshToken !== user?.refreshToken) {
+    throw new ApiErrors(401, "refresh token is expired or used");
+  }
+
+  // Now both cokkie and server acess token are same
+
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  // Aganin genrate acees token and refresh token
+
+  const { acessToken, newrefreshToken } = genrateAcessAndRefreshToken(user._id);
+
+  return res
+    .status(200)
+    .cookie("acessToken", acessToken, options)
+    .cookie("refreshToken", newrefreshToken, options)
+    .json(
+      new ApiResponse(
+        200,
+        { acessToken: acessToken, refreshToken: newrefreshToken },
+        "Acess token updated successfully"
+      )
+    );
+
+  // If we get a valid refresh token
+});
+
+export { register, login, logout, acessRefreshToken };
